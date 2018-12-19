@@ -1,0 +1,4 @@
+rm -rf node_modules result*
+nix-build --cores 0 ./cmd/container.nix
+echo "Created Containers:"
+ls -la result*

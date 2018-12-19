@@ -1,0 +1,1 @@
+nix-shell --cores 0 --pure --command "export NODE_ENV=production; return"
