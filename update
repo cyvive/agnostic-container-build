@@ -1,4 +1,5 @@
-nix-shell --cores 0 -A env --run "updated --color --update; prettier --write package.json"
-rm -rf node_modules/
-nixfromnpm -f ./package.json -o nix-node-packages/ --dev-depth 1
-nix-shell --cores 0 --pure --keep NODE_ENV -A env --run "npm test"
+git submodule update --remote --rebase
+#nix-shell --cores 0 -A env --run "updated --color --update; prettier --write package.json"
+#rm -rf node_modules/
+#nixfromnpm -f ./package.json -o nix-node-packages/ --dev-depth 1
+#nix-shell --cores 0 --pure --keep NODE_ENV -A env --run "npm test"
