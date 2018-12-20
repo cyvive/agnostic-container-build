@@ -26,11 +26,11 @@ buildInfo = {
 };
 
 # Production should contain only the essentials to run the application in a container.
-imagePackages				= [ pkgs.coreutils pkgs.tini ];
-pathProd						= "PATH=${pkgs.coreutils}/bin/:${nodejs}/bin/";
+imagePackages				= [ pkgs.coreutils pkgs.tini pkgs.bash ];
+pathProd						= "PATH=${pkgs.coreutils}/bin/:${nodejs}/bin/:${pkgs.bash}/bin/";
 # Debug should contain the additional tooling for interactivity and debugging, doesn't necessarily pull in the applications 'Development' mode and libraries
-imagePackagesDebug  = [ pkgs.bash ];
-pathDebug						= "${pathProd}:${pkgs.bash}/bin/";
+imagePackagesDebug  = [ pkgs.curl ];
+pathDebug						= "${pathProd}:${pkgs.curl}/bin/";
 
 #######################
 # Build Image Code    #
