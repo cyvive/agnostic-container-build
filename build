@@ -1,4 +1,6 @@
 rm -rf node_modules result*
-nix-build --cores 0 ./cmd/container.nix
+rsync -a --delete --exclude-from=../.container-ignore ../ .
+sed -i "s/\.\/nix-node-packages/\.\.\/nix-node-packages/" default.nix
+nix-build --cores 0 ../cmd/container.nix
 echo "Created Containers:"
 ls -la result*

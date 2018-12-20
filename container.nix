@@ -46,7 +46,7 @@ pkgs = import <nixpkgs> {
   ) ];
 };
 
-nodeModules = (import ../default.nix ({ inherit (pkgs); inherit (nodejs); }));
+nodeModules = (import ../container ({ inherit (pkgs); inherit (nodejs); }));
 in
 	rec {
 		prod = let
