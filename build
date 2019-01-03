@@ -3,6 +3,7 @@ cd container/
 rm -rf node_modules result*
 rsync -a --delete --exclude-from=../.container-ignore ../ .
 sed -i "s/\.\/nix-node-packages/\.\.\/nix-node-packages/" default.nix
+sed -i "s/\.\/project/\.\.\/project/" default.nix
 nix-build --cores 0 ../cmd/container.nix
 echo "Created Containers:"
 cd ..
