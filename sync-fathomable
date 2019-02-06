@@ -1,0 +1,9 @@
+mkdir -p .nixconfig
+JSON=".nixconfig/fathomable.json"
+fmtconv -o $JSON fathomable.yaml
+FATHOMABLE=$(cat $JSON | gron)
+VERSION_PATH=$(echo "$FATHOMABLE" | grep -oe "^json.*.*.version")
+VERSION=$(jq '.version' package.json)
+echo "$FATHOMABLE" | sed 's@'"$VERSION_PATH"'.*@'"$VERSION_PATH"' = '"$VERSION"';@' | ungron > .nixconfig/fathomable.json
+fmtconv -o fathomable.yaml $JSON
+

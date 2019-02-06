@@ -21,8 +21,8 @@ buildInfo = {
 		];
 		WorkingDir = "/lib/${nodeModules.modulePath}/${nodeModules.basicName}";
   };
-  name = "layered-on-top";
-  tag = "latest";
+  name = imageData.name;
+  tag = imageData.tag;
 };
 
 # Production should contain only the essentials to run the application in a container.
@@ -31,6 +31,8 @@ pathProd						= "PATH=${pkgs.coreutils}/bin/:${nodejs}/bin/:${pkgs.bash}/bin/";
 # Debug should contain the additional tooling for interactivity and debugging, doesn't necessarily pull in the applications 'Development' mode and libraries
 imagePackagesDebug  = [ pkgs.curl ];
 pathDebug						= "${pathProd}:${pkgs.curl}/bin/";
+imageData = (builtins.fromJSON (builtins.readFile "${configPath}/image.json"));
+configPath = builtins.toPath (builtins.getEnv "PWD") + "/../.nixconfig";
 
 #######################
 # Build Image Code    #

@@ -1,0 +1,12 @@
+set -e
+
+echo "Validating Tests @Spec @Sanity @Api"
+echo "Validating Code Coverage"
+nix-shell --cores 0 -A env --run "export NODE_ENV=ci; npm test"
+
+echo "Building Container"
+./cmd/build
+
+echo "Publishing Image"
+nix-shell --cores 0 --pure --run "echo \"Published (provided no errors)\"" cmd/publish.nix
+
