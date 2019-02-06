@@ -49,6 +49,7 @@ in
 			# Upload
 			for IMAGE in result result-2; do
 				REPOSITORY=$(cat $(tar xvf ${rootPath}/container/$IMAGE manifest.json) | jq -r '.[0].RepoTags[0]')
+				rm manifest.json
 				# Create Repository if non-existent
 				if [ "$BACKEND" == "ECR" ]; then
 					## TODO apply policy to repository
