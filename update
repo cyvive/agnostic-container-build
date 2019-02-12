@@ -1,5 +1,9 @@
-git submodule update --remote --rebase
-nix-shell --cores 0 -A env --run "updates --update; prettier --write package.json"
+set -e
+
+git submodule update --remote --rebase || true
+if [ -e "default.nix" ]; then
+	nix-shell --cores 0 -A env --run "updates --update; prettier --write package.json"
+fi
 rm -rf node_modules/
 nixfromnpm -f ./package.json -o nix-node-packages/ --dev-depth 1
 sed -e 's@'"$PWD"'@.@' -i default.nix
