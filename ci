@@ -13,8 +13,8 @@ rm -rf node_modules result*
 rsync -a --delete --exclude-from=../.container-ignore ../ .
 
 # Massage nix requires with new folder structure
-sed -i "s/\.\/nix-node-packages/\.\.\/nix-node-packages/" default.nix
-sed -i "s/\.\/project/\.\.\/project/" default.nix
+sed -iBAK "s/\.\/nix-node-packages/\.\.\/nix-node-packages/" default.nix
+sed -iBAK "s/\.\/project/\.\.\/project/" default.nix
 
 # Switch back to root for easier path navigation within nix file
 cd $ROOT
@@ -30,4 +30,3 @@ ls -la container/result*
 
 echo "Publishing Image"
 nix-shell --cores 0 --pure --run "echo \"Published (provided no errors)\"" cmd/publish.nix
-

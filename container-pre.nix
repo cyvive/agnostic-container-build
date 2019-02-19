@@ -31,8 +31,8 @@ in
 		shellHook = ''
 			mkdir -p ${configPath}
 			yaml2json < ${rootPath}/fathomable.yaml > ${configPath}/fathomable.json
-			IMAGE_NAME=$(cat ${configPath}/fathomable.json | gron | head -n 3 | tail -n 1 | cut -d' ' -f1 | cut -d'.' -f2- | sed 's@\.@/@')
-			IMAGE_TAG=$(cat ${configPath}/fathomable.json | gron | grep version | cut -d'"' -f2)
+			IMAGE_NAME=$(cat ${configPath}/fathomable.json | gron | head -n 3 | tail -n 1 | cut -d' ' -f1 | cut -d'.' -f2- | sed 's@\.@/@' | sed 's@\[\"@/@' | sed 's@\"\]@@')
+			IMAGE_TAG=$(cat ${configPath}/fathomable.json | gron | grep version | cut -d'=' -f2 | cut -d'"' -f2)
 			jq -n --arg name $IMAGE_NAME --arg tag $IMAGE_TAG '{"name": $name, "tag": $tag}' > ${configPath}/image.json
       '';
     }

@@ -36,7 +36,7 @@ in
 			# yaml2json < fathomable.yaml > ${configPath}/fathomable.json
 
 			mkdir -p ${configPath}/docker
-			IMAGE_REGISTRY=$(cat .nixconfig/fathomable.json | gron | grep "domain" | cut -d'"' -f2)
+			IMAGE_REGISTRY=$(cat .nixconfig/fathomable.json | gron | grep "domain" | cut -d'=' -f2 | cut -d'"' -f2)
 
 			# ECR Backend
 			if $(echo "$IMAGE_REGISTRY" | grep "ecr" -q); then
