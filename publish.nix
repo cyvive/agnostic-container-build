@@ -35,30 +35,36 @@ in
 			# Available via 'container-pre'
 			# yaml2json < fathomable.yaml > ${configPath}/fathomable.json
 
-			mkdir -p ${configPath}/docker
-			IMAGE_REGISTRY=$(cat .nixconfig/fathomable.json | gron | grep "domain" | cut -d'"' -f2)
+			set -e
+			IMAGE_REGISTRY=$(cat .nixconfig/fathomable.json | gron | grep "domain" | cut -d'=' -f2 | cut -d'"' -f2)
 
 			# ECR Backend
 			if $(echo "$IMAGE_REGISTRY" | grep "ecr" -q); then
 				LOGIN=$(aws ecr get-login --no-include-email --region ap-southeast-2)
 				USERNAME=$(echo $LOGIN | cut -d' ' -f4)
+				echo "$USERNAME" > ${configPath}/docker/username
 				PASSWORD=$(echo $LOGIN | cut -d' ' -f6)
+				echo "$PASSWORD" > ${configPath}/docker/password
 				BACKEND="ECR"
+				echo "$BACKED" > ${configPath}/docker/backend
 			fi
 
 			# Upload
-			for IMAGE in result result-2; do
-				REPOSITORY=$(cat $(tar xvf ${rootPath}/container/$IMAGE manifest.json) | jq -r '.[0].RepoTags[0]')
-				rm manifest.json
-				# Create Repository if non-existent
-				if [ "$BACKEND" == "ECR" ]; then
-					## TODO apply policy to repository
-					REPO_NAME=$(echo $REPOSITORY | cut -d':' -f1)
-					! $(aws ecr describe-repositories | jq '.repositories[].repositoryName' | grep "$REPO_NAME" -q) && aws ecr create-repository --repository-name $REPO_NAME
-				fi
+			REPOSITORY="$(cat ${configPath}/docker/name):$(cat ${configPath}/docker/tag)"
+			if [ -e "$EXTEND_BASAL" ]; then
+				REPOSITORY="$REPOSITORY-basal"
+				#REPOSITORY=$(cat $(tar xvf ${rootPath}/container/CONTAINER_TAR.tar.gz manifest.json) | jq -r '.[0].RepoTags[0]')
+				#rm -f manifest.json
+			fi
+			echo "$REPOSITORY" > ${configPath}/docker/repository
+			# Create Repository if non-existent
+			if [ "$BACKEND" == "ECR" ]; then
+				## TODO apply policy to repository
+				REPO_NAME=$(echo $REPOSITORY | cut -d':' -f1)
+				! $(aws ecr describe-repositories | jq '.repositories[].repositoryName' | grep "$REPO_NAME" -q) && aws ecr create-repository --repository-name $REPO_NAME
+			fi
 
-				skopeo copy --dest-creds $USERNAME:$PASSWORD docker-archive://${rootPath}/container/$IMAGE docker://$IMAGE_REGISTRY/$REPOSITORY
-			done
+			skopeo copy --dest-creds $USERNAME:$PASSWORD docker-archive://${rootPath}/container/$CONTAINER_TAR.tar.gz docker://$IMAGE_REGISTRY/$REPOSITORY
       '';
     }
   else packages

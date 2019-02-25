@@ -11,7 +11,6 @@ let
 	# Create a project relative config directory for storing all external program information
 	rootPath = builtins.toPath (builtins.getEnv "PWD");
 	configPath = "${rootPath}/.nixconfig";
-	# TODO enhance with direnv to allow multiple cluster / account selection(s)
 
 	aws_shell = pkgs.symlinkJoin {
 		name = "aws_shell";
@@ -29,11 +28,17 @@ in
   then pkgs.mkShell
     { buildInputs = packages;
 		shellHook = ''
-			mkdir -p ${configPath}
+			set -e
+			mkdir -p ${configPath}/docker
 			yaml2json < ${rootPath}/fathomable.yaml > ${configPath}/fathomable.json
-			IMAGE_NAME=$(cat ${configPath}/fathomable.json | gron | head -n 3 | tail -n 1 | cut -d' ' -f1 | cut -d'.' -f2- | sed 's@\.@/@')
-			IMAGE_TAG=$(cat ${configPath}/fathomable.json | gron | grep version | cut -d'"' -f2)
+			IMAGE_NAME=$(cat ${configPath}/fathomable.json | gron | head -n 3 | tail -n 1 | cut -d' ' -f1 | cut -d'.' -f2- | sed 's@\.@/@' | sed 's@\[\"@/@' | sed 's@\"\]@@')
+			echo -n $IMAGE_NAME > ${configPath}/docker/name
+			IMAGE_TAG=$(cat ${configPath}/fathomable.json | gron | grep version | cut -d'=' -f2 | cut -d'"' -f2)
+			echo -n $IMAGE_TAG > ${configPath}/docker/tag
 			jq -n --arg name $IMAGE_NAME --arg tag $IMAGE_TAG '{"name": $name, "tag": $tag}' > ${configPath}/image.json
+
+			IMAGE_ORG=$(cat .nixconfig/fathomable.json | gron | head -n 2 | tail -n 1 | cut -d'=' -f1 | cut -d'[' -f2 | cut -d'.' -f2)
+			echo -n $IMAGE_ORG > ${configPath}/docker/org
       '';
     }
   else packages

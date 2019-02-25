@@ -1,33 +1,34 @@
 set -e
+ROOT=$(pwd)
+CONFIG_PATH=.nixconfig/docker
+
+echo "NPM install @ CI mode"
+export NODE_ENV=ci
+npm ci
 
 echo "Validating Tests @Spec @Sanity @Api"
 echo "Validating Code Coverage"
-nix-shell --cores 0 -A env --run "export NODE_ENV=ci; npm test"
+npm test
 
-echo "Building Container"
-ROOT=$(pwd)
-rm -rf node_modules result* container
-mkdir -p $ROOT/container
-cd $ROOT/container/
-rm -rf node_modules result*
-rsync -a --delete --exclude-from=../.container-ignore ../ .
+nix-shell --cores 0 --pure --run "echo \"Identifying Container Name & Tag…\"" container/container-pre.nix
+echo "Checking if Base Container needs extending…"
+if [ -e extend-basal.nix ]; then
+	echo "'extend-basal.nix' detected… extending base image using NIX as builder"
+	cd $ROOT/container
+	nix-build --cores 0 container.nix
+	echo "Publishing Extended Basal Image"
+	CONTAINER_TAR=result EXTEND_BASAL=true nix-shell --cores 0 --pure --keep CONTAINER_TAR --keep EXTEND_BASAL --run "echo \"Published (provided no errors)\"" publish.nix
+	cd $ROOT
+fi
 
-# Massage nix requires with new folder structure
-sed -i "s/\.\/nix-node-packages/\.\.\/nix-node-packages/" default.nix
-sed -i "s/\.\/project/\.\.\/project/" default.nix
+echo "Making Final Container"
+IMAGE_REF="$(cat $CONFIG_PATH/name):$(cat $CONFIG_PATH/tag)"
+if [ -e /makisu-internal/makisu ]; then
+	/makisu-internal/makisu build -f $ROOT/Dockerfile -t $IMAGE_REF --dest $ROOT/container/makisu.tar.gz .
+else
+	docker build -f $ROOT/Dockerfile -t $IMAGE_REF .
+	docker save -o $ROOT/container/makisu.tar.gz $IMAGE_REF
+fi
 
-# Switch back to root for easier path navigation within nix file
-cd $ROOT
-nix-shell --cores 0 --pure --run "echo \"Identifying Container Name & Tag…\"" cmd/container-pre.nix
-
-# Switch to container directory to ensure 'result' files are saved there
-cd $ROOT/container
-echo "Building Container…"
-nix-build --cores 0 ../cmd/container.nix
-echo "Created Containers:"
-cd ..
-ls -la container/result*
-
-echo "Publishing Image"
-nix-shell --cores 0 --pure --run "echo \"Published (provided no errors)\"" cmd/publish.nix
+CONTAINER_TAR=makisu nix-shell --cores 0 --pure --keep CONTAINER_TAR --run "echo \"Published (provided no errors)\"" container/publish.nix
 
