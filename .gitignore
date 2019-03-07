@@ -1,0 +1,17 @@
+.nyc_output/
+coverage.lcov
+*.log
+*.sublime-project
+*.sublime-workspace
+.DS_Store
+.idea/
+.nyc_output/
+.vscode/
+Thumbs.db
+node_modules/
+python_modules/
+scratchpad*
+result*
+coverage/
+.nixconfig/
+*.swp
