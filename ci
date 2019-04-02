@@ -1,14 +1,16 @@
 set -e
 ROOT=$(pwd)
 CONFIG_PATH=.nixconfig/docker
+NIX_NODE="${NIX_NODE:-nodejs}"
+NIX_NODE="${NIX_NODE} git"
 
 echo "NPM install @ CI mode"
 export NODE_ENV=ci
-npm ci
+nix-shell --cores 0 --pure --keep CONFIG_PATH --keep NODE_ENV --run "npm ci" -p $NIX_NODE
 
 echo "Validating Tests @Spec @Sanity @Api"
 echo "Validating Code Coverage"
-npm test
+nix-shell --cores 0 --pure --keep CONFIG_PATH --keep NODE_ENV --run "npm test" -p $NIX_NODE
 
 nix-shell --cores 0 --pure --run "echo \"Identifying Container Name & Tag…\"" container/container-pre.nix
 echo "Checking if Base Container needs extending…"
