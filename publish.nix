@@ -61,7 +61,7 @@ in
 			if [ "$BACKEND" == "ECR" ]; then
 				## TODO apply policy to repository
 				REPO_NAME=$(echo $REPOSITORY | cut -d':' -f1)
-				! $(aws ecr describe-repositories | jq '.repositories[].repositoryName' | grep "$REPO_NAME" -q) && aws ecr create-repository --repository-name $REPO_NAME
+				! $(aws ecr describe-repositories | jq '.repositories[].repositoryName' --region ap-southeast-2 | grep "$REPO_NAME" -q) && aws ecr create-repository --region ap-southeast-2 --repository-name $REPO_NAME
 			fi
 
 			skopeo copy --dest-creds $USERNAME:$PASSWORD docker-archive://${rootPath}/container/$CONTAINER_TAR.tar.gz docker://$IMAGE_REGISTRY/$REPOSITORY
