@@ -2,7 +2,7 @@ set -e
 ROOT=$(pwd)
 CONFIG_PATH=.nixconfig/docker
 NIX_NODE="${NIX_NODE:-nodejs}"
-NIX_NODE="${NIX_NODE} git"
+NIX_NODE="${NIX_NODE} git cacert"
 
 echo "NPM install @ CI mode"
 export NODE_ENV=ci
