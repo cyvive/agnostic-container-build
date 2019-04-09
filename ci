@@ -23,6 +23,9 @@ if [ -e extend-basal.nix ]; then
 	cd $ROOT
 fi
 
+echo "NPM install @ CI mode -- production"
+nix-shell --cores 0 --pure --keep CONFIG_PATH --run "npm ci --production" -p $NIX_NODE
+
 echo "Making Final Container"
 IMAGE_REF="$(cat $CONFIG_PATH/name):$(cat $CONFIG_PATH/tag)"
 if [ -e /makisu-internal/makisu ]; then
